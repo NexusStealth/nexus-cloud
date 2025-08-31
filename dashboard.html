@@ -44,11 +44,11 @@
                     <p>Bem-vindo ao seu painel Nexus-Cloud</p>
                 </div>
                   <div class="dashboard-actions">
-        
-        <button type="file" class="btn btn-primary">
-            <i class="fas fa-cloud-upload-alt"></i> Fazer Upload
-        </button>
-    </div>
+                    <input type="file" id="fileInput" style="display: none;">
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-cloud-upload-alt"></i> Fazer Upload
+                    </button>
+                </div>
             </div>
 
             <div class="storage-stats">
@@ -110,7 +110,7 @@
                     <div class="empty-state">
                         <i class="fas fa-cloud-upload-alt"></i>
                         <p>Nenhum arquivo encontrado</p>
-                        <button class="btn btn-primary" onclick="uploadFile()">Fazer Upload</button>
+                        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">Fazer Upload</button>
                     </div>
                 </div>
             </div>
@@ -128,7 +128,6 @@
             <div class="upload-area" id="dropArea">
                 <i class="fas fa-cloud-upload-alt"></i>
                 <p>Arraste arquivos aqui ou</p>
-                <input type="file" id="fileInput" multiple style="display: none;">
                 <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">Selecionar Arquivos</button>
             </div>
             <div class="upload-progress" id="uploadProgress" style="display: none;">
@@ -145,7 +144,131 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <script src="js/firebase-config.js"></script>
+    <script>
+        // Variáveis globais
+        let currentUser = null;
+        let selectedFile = null;
+
+        // Verificar estado de autenticação
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('userName').textContent = user.displayName || user.email;
+                // Carregar dados do usuário aqui se necessário
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Configurar o input de arquivo
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            selectedFile = file;
+            
+            // Mostrar o modal de upload
+            document.getElementById('uploadModal').style.display = 'flex';
+            
+            // Iniciar o upload automaticamente
+            startUpload();
+        }
+
+        function startUpload() {
+            if (!selectedFile || !currentUser) return;
+            
+            // Mostrar barra de progresso
+            document.getElementById('uploadProgress').style.display = 'block';
+            
+            // Criar referência para o arquivo no Storage
+            const storageRef = firebase.storage().ref();
+            const fileRef = storageRef.child(`users/${currentUser.uid}/files/${selectedFile.name}`);
+            
+            // Fazer upload do arquivo
+            const uploadTask = fileRef.put(selectedFile);
+            
+            // Monitorar progresso do upload
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                    // Progresso do upload
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    document.getElementById('progressBar').style.width = progress + '%';
+                    document.getElementById('progressText').textContent = Math.round(progress) + '%';
+                },
+                (error) => {
+                    // Em caso de erro
+                    console.error('Erro no upload:', error);
+                    alert('Erro ao fazer upload: ' + error.message);
+                },
+                () => {
+                    // Upload concluído com sucesso
+                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                        // Salvar metadados no Firestore
+                        saveFileMetadata(selectedFile, downloadURL);
+                    });
+                }
+            );
+        }
+
+        function saveFileMetadata(file, downloadURL) {
+            const fileData = {
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                uploadDate: new Date(),
+                downloadURL: downloadURL,
+                owner: currentUser.uid
+            };
+            
+            firebase.firestore().collection('files').add(fileData)
+                .then((docRef) => {
+                    console.log('Arquivo salvo com ID: ', docRef.id);
+                    alert('Upload concluído com sucesso!');
+                    closeModal();
+                    // Recarregar dados do usuário se necessário
+                })
+                .catch((error) => {
+                    console.error('Erro ao salvar metadados: ', error);
+                    alert('Erro ao salvar informações do arquivo: ' + error.message);
+                });
+        }
+
+        function closeModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+            document.getElementById('uploadProgress').style.display = 'none';
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('progressText').textContent = '0%';
+            document.getElementById('fileInput').value = '';
+            selectedFile = null;
+        }
+
+        // Fechar modal ao clicar fora dele
+        window.onclick = function(event) {
+            const modal = document.getElementById('uploadModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+
+        // Funções existentes (mantidas do código original)
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                window.location.href = 'index.html';
+            });
+        }
+
+        function showFiles(category) {
+            // Implementação existente
+            console.log('Mostrando arquivos da categoria: ', category);
+        }
+
+        function uploadFile() {
+            document.getElementById('fileInput').click();
+        }
+    </script>
     <script src="js/dashboard.js"></script>
     <script src="js/security-system.js"></script>
 </body>
-</html>
+                        </html>
