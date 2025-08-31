@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus-Cloud - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin-dashboard.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <div class="admin-sidebar">
+            <div class="admin-sidebar-header">
+                <i class="fas fa-shield-alt"></i>
+                <h2>Nexus-Cloud Admin</h2>
+            </div>
+            
+            <nav class="admin-nav">
+                <ul>
+                    <li class="active"><a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li><a href="#"><i class="fas fa-users"></i> Usuários</a></li>
+                    <li><a href="#"><i class="fas fa-database"></i> Armazenamento</a></li>
+                    <li><a href="#"><i class="fas fa-chart-bar"></i> Estatísticas</a></li>
+                    <li><a href="#"><i class="fas fa-cog"></i> Configurações</a></li>
+                </ul>
+            </nav>
+            
+            <div class="admin-sidebar-footer">
+                <button onclick="logoutAdmin()" class="admin-logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="admin-main">
+            <header class="admin-header">
+                <h1>Painel de Controle Administrativo</h1>
+                <div class="admin-actions">
+                    <button class="btn-refresh" onclick="loadRealMetrics()">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
+                </div>
+            </header>
+
+            <div class="admin-content">
+                <!-- Métricas em Tempo Real -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h3><i class="fas fa-network-wired"></i> Desempenho do Sistema</h3>
+                        <div class="metric-item">
+                            <span>Latência:</span>
+                            <span id="latency">Carregando...</span>
+                        </div>
+                        <div class="metric-item">
+                            <span>Tempo de Resposta:</span>
+                            <span id="responseTime">Carregando...</span>
+                        </div>
+                        <div class="metric-item">
+                            <span>Uptime:</span>
+                            <span id="uptime">Carregando...</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <h3><i class="fas fa-database"></i> Armazenamento</h3>
+                        <div class="metric-item">
+                            <span>Espaço Usado:</span>
+                            <span id="storageUsed">Carregando...</span>
+                        </div>
+                        <div class="metric-item">
+                            <span>Total de Arquivos:</span>
+                            <span id="totalFiles">Carregando...</span>
+                        </div>
+                        <div class="metric-item">
+                            <span>Taxa de Upload:</span>
+                            <span id="uploadRate">Carregando...</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <h3><i class="fas fa-users"></i> Usuários</h3>
+                        <div class="metric-item">
+                            <span>Total de Usuários:</span>
+                            <span id="totalUsers">Carregando...</span>
+                        </div>
+                        <div class="metric-item">
+                            <span>Novos (24h):</span>
+                            <span id="newUsers">Carregando...</span>
+                        </div>
+                        <div class="metric-item">
+                            <span>Usuários Ativos:</span>
+                            <span id="activeUsers">Carregando...</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <h3><i class="fas fa-server"></i> Servidor</h3>
+                        <div class="metric-item">
+                            <span>Uso de CPU:</span>
+                            <span id="cpuUsage">Carregando...</span>
+                        </div>
+                        <div class="metric-item">
+                            <span>Uso de Memória:</span>
+                            <span id="memoryUsage">Carregando...</span>
+                        </div>
+                        <div class="metric-item">
+                            <span>Tráfego:</span>
+                            <span id="networkTraffic">Carregando...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ações Rápidas -->
+                <div class="actions-section">
+                    <h2>Ações Rápidas</h2>
+                    <div class="actions-grid">
+                        <button class="action-btn" onclick="clearCache()">
+                            <i class="fas fa-trash"></i>
+                            <span>Limpar Cache</span>
+                        </button>
+                        <button class="action-btn" onclick="runBackup()">
+                            <i class="fas fa-download"></i>
+                            <span>Fazer Backup</span>
+                        </button>
+                        <button class="action-btn" onclick="optimizeDatabase()">
+                            <i class="fas fa-wrench"></i>
+                            <span>Otimizar BD</span>
+                        </button>
+                        <button class="action-btn" onclick="showSystemInfo()">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Info do Sistema</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Estatísticas em Tempo Real -->
+                <div class="stats-section">
+                    <h2>Estatísticas em Tempo Real</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="pageViews">0</h3>
+                                <p>Visualizações de Página</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="downloads">0</h3>
+                                <p>Downloads Realizados</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-upload"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="uploads">0</h3>
+                                <p>Uploads Realizados</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/admin-dashboard.js"></script>
+</body>
+</html>

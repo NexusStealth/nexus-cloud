@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus-Cloud - Seu Armazenamento em Nuvem</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-cloud logo-icon"></i>
+                <span class="logo-text">Nexus-Cloud</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#home">Início</a></li>
+                    <li><a href="#features">Recursos</a></li>
+                    <li><a href="#pricing">Preços</a></li>
+                    <li><a href="#contact">Contato</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <button class="btn btn-outline" onclick="location.href='login.html'">Entrar</button>
+                <button class="btn btn-primary" onclick="location.href='register.html'">Cadastrar</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <h1>Armazenamento Ilimitado para Todos os Seus Arquivos</h1>
+            <p>Guarde com segurança suas fotos, vídeos, documentos e muito mais com acesso de qualquer lugar e a qualquer momento.</p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" onclick="location.href='register.html'">Começar Agora</button>
+                <button class="btn btn-outline">Saiba Mais</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">Recursos Incríveis</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-lock feature-icon"></i>
+                    <h3>Segurança Máxima</h3>
+                    <p>Seus arquivos são criptografados e protegidos com as melhores práticas de segurança.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-bolt feature-icon"></i>
+                    <h3>Acesso Rápido</h3>
+                    <p>Acesse seus arquivos rapidamente de qualquer dispositivo com internet.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-infinity feature-icon"></i>
+                    <h3>Armazenamento Ilimitado</h3>
+                    <p>Nunca mais se preocupe com espaço, armazene todos os arquivos que precisar.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-mobile-alt feature-icon"></i>
+                    <h3>Multiplataforma</h3>
+                    <p>Acesse de qualquer dispositivo: computador, tablet ou smartphone.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <div class="footer-logo">
+                        <i class="fas fa-cloud logo-icon"></i>
+                        <span class="logo-text">Nexus-Cloud</span>
+                    </div>
+                    <p>Armazenamento em nuvem seguro e ilimitado para todos os seus arquivos.</p>
+                </div>
+                <div class="footer-links">
+                    <h3>Links Rápidos</h3>
+                    <ul>
+                        <li><a href="#home">Início</a></li>
+                        <li><a href="#features">Recursos</a></li>
+                        <li><a href="#pricing">Preços</a></li>
+                        <li><a href="#contact">Contato</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h3>Suporte</h3>
+                    <ul>
+                        <li><a href="#">Central de Ajuda</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Política de Privacidade</a></li>
+                        <li><a href="#">Termos de Uso</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 Nexus-Cloud. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/security-system.js"></script>
+</body>
+</html>
