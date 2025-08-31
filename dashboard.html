@@ -22,7 +22,7 @@
             <nav>
                 <ul>
                     <li><a href="dashboard.html" class="active">Dashboard</a></li>
-                    <li><a href="#files">Arquivos</a></li>
+                    <li><a href="#totalFiles">Arquivos</a></li>
                     <li><a href="#photos">Fotos</a></li>
                     <li><a href="#videos">Vídeos</a></li>
                 </ul>
@@ -77,12 +77,12 @@
 
             <h2 class="section-title">Seus Arquivos por Categoria</h2>
             <div class="file-types">
-                <div class="file-type-card" onclick="showFiles('images')">
+                <div class="file-type-card" onclick="showFiles('images')" id="photos">
                     <i class="fas fa-image file-type-icon"></i>
                     <h3>Imagens</h3>
                     <p id="imageCount">0 arquivos</p>
                 </div>
-                <div class="file-type-card" onclick="showFiles('videos')">
+                <div class="file-type-card" onclick="showFiles('videos')" id="videos">
                     <i class="fas fa-video file-type-icon"></i>
                     <h3>Vídeos</h3>
                     <p id="videoCount">0 arquivos</p>
