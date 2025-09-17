@@ -106,35 +106,30 @@ async function saveFileMetadata(userId, fileData, file) {
 
 // Função principal de upload
 async function startUpload() {
-    const fileInput = document.getElementById('fileInput');
-    const files = fileInput.files;
-    
-    if (files.length === 0) return;
-    
-    const user = auth.currentUser;
-    if (!user) return;
+    if (!selectedFile || !currentUser) return;
     
     document.getElementById('uploadProgress').style.display = 'block';
-    document.getElementById('uploadButton').disabled = true;
+    const storageRef = firebase.storage().ref();
+    const fileRef = storageRef.child(`users/${currentUser.uid}/files/${Date.now()}_${selectedFile.name}`);
+    const uploadTask = fileRef.put(selectedFile);
     
-    try {
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            const fileData = await uploadFileToStorage(file, user.uid);
-            await saveFileMetadata(user.uid, fileData, file);
+    uploadTask.on('state_changed', 
+        (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = Math.round(progress) + '%';
+        },
+        (error) => {
+            console.error('Erro no upload:', error);
+            alert('Erro ao fazer upload: ' + error.message);
+            closeModal();
+        },
+        () => {
+            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                saveFileMetadata(selectedFile, downloadURL);
+            });
         }
-        
-        alert('Upload completo!');
-        closeModal('uploadModal');
-        
-        // Recarregar os dados do usuário para atualizar as estatísticas
-        loadUserData(user.uid);
-    } catch (error) {
-        console.error('Erro no upload:', error);
-        alert('Erro ao fazer upload: ' + error.message);
-    } finally {
-        resetUploadProgress();
-    }
+    );
 }
 
 // Função para formatar bytes em tamanho legível
@@ -158,13 +153,20 @@ function loadUserData(uid) {
                 if (fileCount[data.category] !== undefined) fileCount[data.category]++;
                 else fileCount.others++;
             });
-            document.getElementById('storageUsed').textContent = formatBytes(storageUsed);
-            document.getElementById('totalFiles').textContent = snapshot.size;
-            document.getElementById('imageCount').textContent = `${fileCount.images} arquivos`;
-            document.getElementById('videoCount').textContent = `${fileCount.videos} arquivos`;
-            document.getElementById('documentCount').textContent = `${fileCount.documents} arquivos`;
-            document.getElementById('audioCount').textContent = `${fileCount.audios} arquivos`;
-            document.getElementById('otherCount').textContent = `${fileCount.others} arquivos`;
+            if(document.getElementById('storageUsed'))
+                document.getElementById('storageUsed').textContent = formatBytes(storageUsed);
+            if(document.getElementById('totalFiles'))
+                document.getElementById('totalFiles').textContent = snapshot.size;
+            if(document.getElementById('imageCount'))
+                document.getElementById('imageCount').textContent = `${fileCount.images} arquivos`;
+            if(document.getElementById('videoCount'))
+                document.getElementById('videoCount').textContent = `${fileCount.videos} arquivos`;
+            if(document.getElementById('documentCount'))
+                document.getElementById('documentCount').textContent = `${fileCount.documents} arquivos`;
+            if(document.getElementById('audioCount'))
+                document.getElementById('audioCount').textContent = `${fileCount.audios} arquivos`;
+            if(document.getElementById('otherCount'))
+                document.getElementById('otherCount').textContent = `${fileCount.others} arquivos`;
         })
         .catch(err => {
             console.error('Erro ao carregar dados do usuário:', err);
@@ -180,14 +182,15 @@ function listRecentFiles(uid) {
         .get()
         .then(snapshot => {
             const filesList = document.getElementById('recentFiles');
+            if (!filesList) return;
             filesList.innerHTML = '';
             if (snapshot.empty) {
-                filesList.innerHTML = `<div class="empty-state"><i class='fas fa-cloud-upload-alt'></i><p>Nenhum arquivo encontrado</p></div>`;
+                filesList.innerHTML = `<div class=\"empty-state\"><i class='fas fa-cloud-upload-alt'></i><p>Nenhum arquivo encontrado</p></div>`;
                 return;
             }
             snapshot.forEach(doc => {
                 const data = doc.data();
-                filesList.innerHTML += renderFileItem(doc.id, data);
+                filesList.innerHTML += renderFileItem(doc.id, data, true);
             });
         })
         .catch(err => {
@@ -211,7 +214,7 @@ function listFilesByCategory(uid, category) {
             }
             filesList.innerHTML = '';
             if (snapshot.empty) {
-                filesList.innerHTML = `<div class="empty-state"><i class='fas fa-cloud-upload-alt'></i><p>Nenhum arquivo encontrado</p></div>`;
+                filesList.innerHTML = `<div class=\"empty-state\"><i class='fas fa-cloud-upload-alt'></i><p>Nenhum arquivo encontrado</p></div>`;
                 return;
             }
             snapshot.forEach(doc => {
@@ -227,19 +230,21 @@ function listFilesByCategory(uid, category) {
 // Renderiza um item de arquivo
 function renderFileItem(id, data, showActions = false) {
     const shortName = data.name.length > 20 ? data.name.substring(0, 17) + '...' : data.name;
-    const date = data.uploadDate && data.uploadDate.toDate ? data.uploadDate.toDate() : new Date(data.uploadDate);
+    let date = data.uploadDate;
+    if (date && typeof date.toDate === 'function') date = date.toDate();
+    else date = new Date(date);
     const dateStr = date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR');
     return `
-    <div class="file-item">
-        <div class="file-info">
-            <span title="${data.name}"><b>${shortName}</b></span>
+    <div class=\"file-item\">
+        <div class=\"file-info\">
+            <span title=\"${data.name}\"><b>${shortName}</b></span>
             <span>${formatBytes(data.size)}</span>
             <span>${data.type || '-'}</span>
             <span>${dateStr}</span>
         </div>
-        <div class="file-actions">
-            <a href="${data.downloadURL}" download target="_blank" class="btn btn-outline"><i class="fas fa-download"></i></a>
-            ${showActions ? `<button class="btn btn-outline" onclick="deleteFile('${id}', '${data.name}')"><i class="fas fa-trash"></i></button>` : ''}
+        <div class=\"file-actions\">
+            <a href=\"${data.downloadURL}\" download target=\"_blank\" class=\"btn btn-outline\"><i class=\"fas fa-download\"></i></a>
+            ${showActions ? `<button class=\"btn btn-outline\" onclick=\"deleteFile('${id}', '${data.name}')\"><i class=\"fas fa-trash\"></i></button>` : ''}
         </div>
     </div>`;
 }
@@ -264,6 +269,12 @@ function deleteFile(id, fileName) {
         });
     });
 }
+
+// Exporta funções para uso global
+window.loadUserData = loadUserData;
+window.listFilesByCategory = listFilesByCategory;
+window.listRecentFiles = listRecentFiles;
+window.deleteFile = deleteFile;
 
 // Download de arquivo
 function downloadFile(url, fileName) {
