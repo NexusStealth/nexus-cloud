@@ -137,113 +137,132 @@ async function startUpload() {
     }
 }
 
-// Carregar dados do usuário
-function loadUserData(userId) {
-    db.collection('users').doc(userId).get()
-        .then((doc) => {
-            if (doc.exists) {
-                const userData = doc.data();
-                updateDashboard(userData);
-                
-                // Carregar arquivos recentes
-                loadRecentFiles(userId);
-            }
+// Função para formatar bytes em tamanho legível
+function formatBytes(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Atualiza o dashboard com contadores e espaço usado
+function loadUserData(uid) {
+    firebase.firestore().collection('files').where('owner', '==', uid).get()
+        .then(snapshot => {
+            let storageUsed = 0;
+            let fileCount = { images: 0, videos: 0, documents: 0, audios: 0, others: 0 };
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                storageUsed += data.size || 0;
+                if (fileCount[data.category] !== undefined) fileCount[data.category]++;
+                else fileCount.others++;
+            });
+            document.getElementById('storageUsed').textContent = formatBytes(storageUsed);
+            document.getElementById('totalFiles').textContent = snapshot.size;
+            document.getElementById('imageCount').textContent = `${fileCount.images} arquivos`;
+            document.getElementById('videoCount').textContent = `${fileCount.videos} arquivos`;
+            document.getElementById('documentCount').textContent = `${fileCount.documents} arquivos`;
+            document.getElementById('audioCount').textContent = `${fileCount.audios} arquivos`;
+            document.getElementById('otherCount').textContent = `${fileCount.others} arquivos`;
         })
-        .catch((error) => {
-            console.error('Erro ao carregar dados do usuário:', error);
+        .catch(err => {
+            console.error('Erro ao carregar dados do usuário:', err);
         });
 }
 
-// Carregar arquivos recentes
-function loadRecentFiles(userId) {
-    db.collection('files')
-        .where('userId', '==', userId)
-        .orderBy('createdAt', 'desc')
+// Lista arquivos recentes (últimos 5)
+function listRecentFiles(uid) {
+    firebase.firestore().collection('files')
+        .where('owner', '==', uid)
+        .orderBy('uploadDate', 'desc')
         .limit(5)
         .get()
-        .then((querySnapshot) => {
+        .then(snapshot => {
             const filesList = document.getElementById('recentFiles');
-            
-            if (querySnapshot.empty) {
-                filesList.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <p>Nenhum arquivo encontrado</p>
-                        <button class="btn btn-primary" onclick="uploadFile()">Fazer Upload</button>
-                    </div>
-                `;
+            filesList.innerHTML = '';
+            if (snapshot.empty) {
+                filesList.innerHTML = `<div class="empty-state"><i class='fas fa-cloud-upload-alt'></i><p>Nenhum arquivo encontrado</p></div>`;
                 return;
             }
-            
-            filesList.innerHTML = '';
-            querySnapshot.forEach((doc) => {
-                const file = doc.data();
-                const fileItem = createFileItem(file, doc.id);
-                filesList.appendChild(fileItem);
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                filesList.innerHTML += renderFileItem(doc.id, data);
             });
         })
-        .catch((error) => {
-            console.error('Erro ao carregar arquivos recentes:', error);
+        .catch(err => {
+            console.error('Erro ao listar arquivos recentes:', err);
         });
 }
 
-// Criar elemento de item de arquivo
-function createFileItem(file, fileId) {
-    const fileItem = document.createElement('div');
-    fileItem.className = 'file-item';
-    
-    const iconClass = getFileIconClass(file.type, file.extension);
-    
-    fileItem.innerHTML = `
-        <div class="file-icon">
-            <i class="${iconClass}"></i>
-        </div>
-        <div class="file-info">
-            <div class="file-name">${file.name}</div>
-            <div class="file-details">
-                ${formatBytes(file.size)} • ${file.extension.toUpperCase()}
-            </div>
-        </div>
-        <div class="file-actions">
-            <button class="btn-icon" onclick="downloadFile('${file.downloadURL}', '${file.name}')">
-                <i class="fas fa-download"></i>
-            </button>
-            <button class="btn-icon btn-danger" onclick="deleteFile('${fileId}', '${file.name}', '${file.type}', ${file.size})">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
-    `;
-    
-    return fileItem;
+// Lista arquivos por categoria
+function listFilesByCategory(uid, category) {
+    firebase.firestore().collection('files')
+        .where('owner', '==', uid)
+        .where('category', '==', category)
+        .orderBy('uploadDate', 'desc')
+        .get()
+        .then(snapshot => {
+            let filesList = document.getElementById('recentFiles');
+            if (!filesList) {
+                filesList = document.createElement('div');
+                filesList.id = 'recentFiles';
+                document.body.appendChild(filesList);
+            }
+            filesList.innerHTML = '';
+            if (snapshot.empty) {
+                filesList.innerHTML = `<div class="empty-state"><i class='fas fa-cloud-upload-alt'></i><p>Nenhum arquivo encontrado</p></div>`;
+                return;
+            }
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                filesList.innerHTML += renderFileItem(doc.id, data, true);
+            });
+        })
+        .catch(err => {
+            console.error('Erro ao listar arquivos por categoria:', err);
+        });
 }
 
-// Obter classe do ícone baseado no tipo de arquivo
-function getFileIconClass(fileType, extension) {
-    const iconMap = {
-        images: 'fas fa-image',
-        videos: 'fas fa-video',
-        audios: 'fas fa-music',
-        documents: 'fas fa-file-alt',
-        others: 'fas fa-file'
-    };
-    
-    // Ícones específicos para extensões de documentos
-    const docIcons = {
-        pdf: 'fas fa-file-pdf',
-        doc: 'fas fa-file-word',
-        docx: 'fas fa-file-word',
-        xls: 'fas fa-file-excel',
-        xlsx: 'fas fa-file-excel',
-        ppt: 'fas fa-file-powerpoint',
-        pptx: 'fas fa-file-powerpoint',
-        txt: 'fas fa-file-alt'
-    };
-    
-    if (fileType === 'documents' && docIcons[extension]) {
-        return docIcons[extension];
-    }
-    
-    return iconMap[fileType] || 'fas fa-file';
+// Renderiza um item de arquivo
+function renderFileItem(id, data, showActions = false) {
+    const shortName = data.name.length > 20 ? data.name.substring(0, 17) + '...' : data.name;
+    const date = data.uploadDate && data.uploadDate.toDate ? data.uploadDate.toDate() : new Date(data.uploadDate);
+    const dateStr = date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR');
+    return `
+    <div class="file-item">
+        <div class="file-info">
+            <span title="${data.name}"><b>${shortName}</b></span>
+            <span>${formatBytes(data.size)}</span>
+            <span>${data.type || '-'}</span>
+            <span>${dateStr}</span>
+        </div>
+        <div class="file-actions">
+            <a href="${data.downloadURL}" download target="_blank" class="btn btn-outline"><i class="fas fa-download"></i></a>
+            ${showActions ? `<button class="btn btn-outline" onclick="deleteFile('${id}', '${data.name}')"><i class="fas fa-trash"></i></button>` : ''}
+        </div>
+    </div>`;
+}
+
+// Exclui arquivo do Firestore e Storage
+function deleteFile(id, fileName) {
+    if (!confirm(`Deseja realmente apagar o arquivo: ${fileName}?`)) return;
+    firebase.firestore().collection('files').doc(id).get().then(doc => {
+        if (!doc.exists) return alert('Arquivo não encontrado!');
+        const data = doc.data();
+        // Remove do Storage
+        const storageRef = firebase.storage().refFromURL(data.downloadURL);
+        storageRef.delete().then(() => {
+            // Remove do Firestore
+            firebase.firestore().collection('files').doc(id).delete().then(() => {
+                alert('Arquivo apagado com sucesso!');
+                if (typeof loadUserData === 'function') loadUserData(data.owner);
+                if (typeof listRecentFiles === 'function') listRecentFiles(data.owner);
+            });
+        }).catch(err => {
+            alert('Erro ao apagar do Storage: ' + err.message);
+        });
+    });
 }
 
 // Download de arquivo
@@ -305,19 +324,6 @@ async function deleteFile(fileId, fileName, fileType, fileSize) {
 // Mostrar arquivos por tipo (redirecionar para página específica)
 function showFiles(type) {
     window.location.href = `files.html?type=${type}`;
-}
-
-// Formatador de bytes
-function formatBytes(bytes, decimals = 2) {
-    if (bytes === 0) return '0 Bytes';
-    
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
 // Restante do código permanece igual...

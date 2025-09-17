@@ -155,6 +155,7 @@
                 currentUser = user;
                 document.getElementById('userName').textContent = user.displayName || user.email;
                 // Carregar dados do usuário aqui se necessário
+                if (typeof loadUserData === 'function') loadUserData(currentUser.uid);
             } else {
                 window.location.href = 'index.html';
             }
@@ -166,46 +167,29 @@
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
-            
             selectedFile = file;
-            
-            // Mostrar o modal de upload
             document.getElementById('uploadModal').style.display = 'flex';
-            
-            // Iniciar o upload automaticamente
             startUpload();
         }
 
         function startUpload() {
             if (!selectedFile || !currentUser) return;
-            
-            // Mostrar barra de progresso
             document.getElementById('uploadProgress').style.display = 'block';
-            
-            // Criar referência para o arquivo no Storage
             const storageRef = firebase.storage().ref();
-            const fileRef = storageRef.child(`users/${currentUser.uid}/files/${selectedFile.name}`);
-            
-            // Fazer upload do arquivo
+            const fileRef = storageRef.child(`users/${currentUser.uid}/files/${Date.now()}_${selectedFile.name}`);
             const uploadTask = fileRef.put(selectedFile);
-            
-            // Monitorar progresso do upload
             uploadTask.on('state_changed', 
                 (snapshot) => {
-                    // Progresso do upload
                     const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                     document.getElementById('progressBar').style.width = progress + '%';
                     document.getElementById('progressText').textContent = Math.round(progress) + '%';
                 },
                 (error) => {
-                    // Em caso de erro
                     console.error('Erro no upload:', error);
                     alert('Erro ao fazer upload: ' + error.message);
                 },
                 () => {
-                    // Upload concluído com sucesso
                     uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                        // Salvar metadados no Firestore
                         saveFileMetadata(selectedFile, downloadURL);
                     });
                 }
@@ -213,26 +197,35 @@
         }
 
         function saveFileMetadata(file, downloadURL) {
+            const fileType = getFileCategory(file.type, file.name);
             const fileData = {
                 name: file.name,
                 type: file.type,
                 size: file.size,
                 uploadDate: new Date(),
                 downloadURL: downloadURL,
-                owner: currentUser.uid
+                owner: currentUser.uid,
+                category: fileType
             };
-            
             firebase.firestore().collection('files').add(fileData)
                 .then((docRef) => {
-                    console.log('Arquivo salvo com ID: ', docRef.id);
                     alert('Upload concluído com sucesso!');
                     closeModal();
-                    // Recarregar dados do usuário se necessário
+                    if (typeof loadUserData === 'function') loadUserData(currentUser.uid);
+                    if (typeof listRecentFiles === 'function') listRecentFiles(currentUser.uid);
                 })
                 .catch((error) => {
                     console.error('Erro ao salvar metadados: ', error);
                     alert('Erro ao salvar informações do arquivo: ' + error.message);
                 });
+        }
+
+        function getFileCategory(mimeType, fileName) {
+            if (mimeType.startsWith('image/')) return 'images';
+            if (mimeType.startsWith('video/')) return 'videos';
+            if (mimeType.startsWith('audio/')) return 'audios';
+            if (mimeType === 'application/pdf' || mimeType.includes('word') || mimeType.includes('excel') || mimeType.includes('presentation') || /\.(pdf|docx?|xlsx?|pptx?)$/i.test(fileName)) return 'documents';
+            return 'others';
         }
 
         function closeModal() {
@@ -252,7 +245,6 @@
             }
         };
 
-        // Funções existentes (mantidas do código original)
         function logout() {
             firebase.auth().signOut().then(() => {
                 window.location.href = 'index.html';
@@ -260,8 +252,7 @@
         }
 
         function showFiles(category) {
-            // Implementação existente
-            console.log('Mostrando arquivos da categoria: ', category);
+            if (typeof listFilesByCategory === 'function') listFilesByCategory(currentUser.uid, category);
         }
 
         function uploadFile() {
