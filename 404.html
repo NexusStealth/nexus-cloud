@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>404 — Página não encontrada</title>
+  <style>
+    /* Reset simples */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: linear-gradient(180deg,#0f172a 0%, #071028 60%);
+      color:#e6eef8;
+      -webkit-font-smoothing:antialiased;
+      display:flex;align-items:center;justify-content:center;padding:24px;
+    }
+    .card{
+      width:100%;max-width:1000px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border:1px solid rgba(255,255,255,0.04);backdrop-filter: blur(6px);
+      border-radius:14px;padding:28px;display:flex;gap:28px;align-items:center;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+    }
+    .brand{width:120px;height:120px;flex:0 0 120px;display:flex;align-items:center;justify-content:center}
+    .brand img{max-width:100%;max-height:100%}
+    .content{flex:1}
+    h1{font-size:48px;line-height:1;color:#fff;margin-bottom:8px;letter-spacing:-1px}
+    p.lead{color:#cfe7ff;margin-bottom:14px}
+    .code{display:inline-block;background:rgba(255,255,255,0.03);padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.02);font-weight:600}
+    .actions{margin-top:18px;display:flex;gap:12px;flex-wrap:wrap}
+    a.btn{display:inline-flex;align-items:center;gap:10px;padding:10px 16px;border-radius:10px;text-decoration:none;font-weight:700}
+    a.primary{background:linear-gradient(90deg,#7c3aed,#06b6d4);color:#021024}
+    a.ghost{border:1px solid rgba(255,255,255,0.06);color:#dff3ff;background:transparent}
+    .meta{margin-top:12px;color:#9fc1de;font-size:13px}
+
+    /* ilustracao */
+    .illustration{width:220px;display:flex;align-items:center;justify-content:center}
+    .orb{
+      width:160px;height:160px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #7c3aed, #06b6d4 60%);box-shadow:0 8px 40px rgba(7,10,40,0.6), inset 0 -6px 30px rgba(0,0,0,0.25);
+      display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:28px
+    }
+    .orb small{display:block;font-size:12px;opacity:0.9}
+
+    /* responsivo */
+    @media (max-width:800px){
+      .card{flex-direction:column;align-items:flex-start}
+      .illustration{order:2;width:100%;display:flex;justify-content:flex-start}
+      .brand{display:none}
+      h1{font-size:36px}
+    }
+  </style>
+</head>
+<body>
+  <div class="card" role="alert">
+    <div class="brand">
+      <!-- tente usar o logo do site, se existir: /img/logo.png -->
+      <img src="/img/logo.png" alt="Nexus Cloud" onerror="this.style.display='none'"/>
+    </div>
+    <div class="content">
+      <h1>Ops — Página não encontrada</h1>
+      <p class="lead">A rota que você tentou acessar não existe ou o servidor está temporariamente indisponível. Não se preocupe — a gente cuida disso.</p>
+      <div class="meta">Código: <span class="code">404</span> &nbsp;•&nbsp; Horário: <span id="time" class="code"></span></div>
+      <div class="actions">
+        <a href="/" class="btn primary">Voltar para o início</a>
+        <a href="/contact" class="btn ghost">Reportar problema</a>
+        <a href="#" class="btn ghost" id="retry">Tentar recarregar</a>
+      </div>
+    </div>
+    <div class="illustration" aria-hidden="true">
+      <div class="orb">
+          <img src="/img/icon.png" alt="Nexus Cloud" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // mostra horário local (útil pra logs quando o usuário reporta)
+    const t = new Date();
+    const pad = n=>String(n).padStart(2,'0');
+    document.getElementById('time').textContent = `${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())} ${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}`;
+
+    // retry inteligente
+    document.getElementById('retry').addEventListener('click', e=>{
+      e.preventDefault();
+      location.reload();
+    });
+  </script>
+</body>
+</html>

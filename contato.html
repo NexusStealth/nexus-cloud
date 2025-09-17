@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contato — Nexus Cloud</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  body {
+    font-family: Inter, Arial, sans-serif;
+    background: linear-gradient(180deg,#0f172a 0%, #071028 60%);
+    color:#e6eef8;
+    margin:0;
+    padding:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+  }
+  .container {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(8px);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 40px;
+    max-width: 600px;
+    width: 90%;
+    text-align:center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  }
+  .logo-wrap {
+    width:88px;
+    height:88px;
+    border-radius:50%;
+    margin:0 auto 16px;
+    overflow:hidden;
+    background: radial-gradient(circle at 30% 30%, #7c3aed, #06b6d4 60%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 6px 20px rgba(0,0,0,0.4);
+  }
+  .logo-wrap img { width:100%; height:100%; object-fit:cover; display:block; }
+  h1 {
+    font-size: 32px;
+    margin-bottom: 12px;
+    color:#fff;
+  }
+  p {
+    color:#cfe7ff;
+    margin-bottom: 30px;
+  }
+  .contacts {
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+  }
+  .contact-item {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:18px;
+    justify-content:space-between;
+    color:#e6eef8;
+    text-decoration:none;
+    padding:14px 20px;
+    border-radius:12px;
+    background: rgba(255,255,255,0.02);
+    border:1px solid rgba(255,255,255,0.04);
+    transition: all 0.2s ease;
+  }
+  .contact-item i {
+    font-size:24px;
+    color:#06b6d4;
+    flex-shrink:0;
+  }
+  .contact-item:hover {
+    transform: translateY(-3px);
+    background: rgba(255,255,255,0.05);
+    border-color: #06b6d4;
+    color:#fff;
+  }
+  .contact-btn {
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 16px;
+    border-radius:10px;
+    text-decoration:none;
+    font-weight:600;
+    font-size:14px;
+    transition: all 0.2s ease;
+  }
+  .btn-primary {
+    background: linear-gradient(90deg,#7c3aed,#06b6d4);
+    color:#021024;
+  }
+  .btn-primary:hover {
+    opacity:0.9;
+    transform: translateY(-2px);
+  }
+  .btn-ghost {
+    border:1px solid rgba(255,255,255,0.06);
+    color:#dff3ff;
+    background:transparent;
+  }
+  .btn-ghost:hover {
+    background: rgba(255,255,255,0.03);
+    color:#fff;
+    transform: translateY(-2px);
+  }
+  .btn-back {
+    margin-top:30px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 20px;
+    border-radius:12px;
+    font-weight:700;
+    background: rgba(255,255,255,0.02);
+    border:1px solid rgba(255,255,255,0.04);
+    color:#dff3ff;
+    text-decoration:none;
+    transition:0.2s;
+  }
+  .btn-back:hover {
+    background: rgba(255,255,255,0.05);
+    border-color:#06b6d4;
+    color:#fff;
+    transform:translateY(-2px);
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo-wrap">
+      <img src="/img/icon.png" alt="Nexus Cloud Logo">
+    </div>
+
+    <h1>Entre em Contato</h1>
+    <p>Fale com a equipe da <strong>Nexus Cloud</strong> pelos canais abaixo:</p>
+
+    <div class="contacts">
+      <a class="contact-item" href="https://wa.me/5581996656393" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+        <span>WhatsApp: (81) 99665-6393</span>
+        <span class="contact-btn btn-primary"><i class="fab fa-whatsapp"></i> Abrir</span>
+      </a>
+
+      <a class="contact-item" href="mailto:support@securegen.shop">
+        <i class="fas fa-envelope"></i>
+        <span>E-mail</span>
+        <span class="contact-btn btn-primary"><i class="fas fa-paper-plane"></i> Enviar</span>
+      </a>
+    </div>
+
+    <a href="/index.html" class="btn-back"><i class="fas fa-arrow-left"></i> Voltar ao Início</a>
+  </div>
+</body>
+</html>
+
