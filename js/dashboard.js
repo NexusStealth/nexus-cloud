@@ -104,8 +104,7 @@ async function saveFileMetadata(userId, fileData, file) {
     }
 }
 
-// Função principal de upload
-async function startUpload() {
+function startUpload() {
     if (!selectedFile || !currentUser) return;
     
     document.getElementById('uploadProgress').style.display = 'block';
@@ -127,6 +126,10 @@ async function startUpload() {
         () => {
             uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
                 saveFileMetadata(selectedFile, downloadURL);
+            }).catch(error => {
+                console.error('Erro ao obter URL:', error);
+                alert('Erro ao finalizar upload: ' + error.message);
+                closeModal();
             });
         }
     );

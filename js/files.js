@@ -49,9 +49,12 @@ function loadFiles() {
     query.get().then(snapshot => {
         allFiles = [];
         snapshot.forEach(doc => {
+            const data = doc.data();
             allFiles.push({
                 id: doc.id,
-                ...doc.data()
+                ...data,
+                // Garantir que a data seja um objeto Date
+                uploadDate: data.uploadDate ? (data.uploadDate.toDate ? data.uploadDate.toDate() : new Date(data.uploadDate)) : new Date()
             });
         });
         
@@ -83,7 +86,7 @@ function displayFiles(files) {
 }
 
 function renderFileCard(file) {
-    const uploadDate = file.uploadDate ? file.uploadDate.toDate().toLocaleDateString('pt-BR') : 'Data desconhecida';
+    const uploadDate = file.uploadDate ? file.uploadDate.toLocaleDateString('pt-BR') : 'Data desconhecida';
     const shortName = file.name.length > 20 ? file.name.substring(0, 17) + '...' : file.name;
     const fileIcon = getFileIcon(file.type, file.name);
     
@@ -114,7 +117,7 @@ function renderFileCard(file) {
 }
 
 function renderFileRow(file) {
-    const uploadDate = file.uploadDate ? file.uploadDate.toDate().toLocaleDateString('pt-BR') : 'Data desconhecida';
+    const uploadDate = file.uploadDate ? file.uploadDate.toLocaleDateString('pt-BR') : 'Data desconhecida';
     const shortName = file.name.length > 30 ? file.name.substring(0, 27) + '...' : file.name;
     const fileIcon = getFileIcon(file.type, file.name);
     const fileType = getFileTypeName(file.type, file.name);
@@ -140,9 +143,9 @@ function renderFileRow(file) {
 }
 
 function getFileIcon(mimeType, fileName) {
-    if (mimeType.startsWith('image/')) return '<i class="fas fa-image"></i>';
-    if (mimeType.startsWith('video/')) return '<i class="fas fa-video"></i>';
-    if (mimeType.startsWith('audio/')) return '<i class="fas fa-music"></i>';
+    if (mimeType && mimeType.startsWith('image/')) return '<i class="fas fa-image"></i>';
+    if (mimeType && mimeType.startsWith('video/')) return '<i class="fas fa-video"></i>';
+    if (mimeType && mimeType.startsWith('audio/')) return '<i class="fas fa-music"></i>';
     
     const extension = fileName.split('.').pop().toLowerCase();
     if (['pdf'].includes(extension)) return '<i class="fas fa-file-pdf"></i>';
@@ -156,9 +159,9 @@ function getFileIcon(mimeType, fileName) {
 }
 
 function getFileTypeName(mimeType, fileName) {
-    if (mimeType.startsWith('image/')) return 'Imagem';
-    if (mimeType.startsWith('video/')) return 'Vídeo';
-    if (mimeType.startsWith('audio/')) return 'Áudio';
+    if (mimeType && mimeType.startsWith('image/')) return 'Imagem';
+    if (mimeType && mimeType.startsWith('video/')) return 'Vídeo';
+    if (mimeType && mimeType.startsWith('audio/')) return 'Áudio';
     
     const extension = fileName.split('.').pop().toLowerCase();
     if (['pdf'].includes(extension)) return 'PDF';
@@ -232,7 +235,15 @@ function logout() {
     });
 }
 
-// Função para formatar bytes (já existente no dashboard.js)
+function filterFiles() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const filteredFiles = allFiles.filter(file => 
+        file.name.toLowerCase().includes(searchTerm)
+    );
+    displayFiles(filteredFiles);
+}
+
+// Função para formatar bytes
 function formatBytes(bytes) {
     if (bytes === 0) return '0 B';
     const k = 1024;

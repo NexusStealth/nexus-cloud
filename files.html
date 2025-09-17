@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/files.css">
-    <link rel="icon" type="image/png" href="/img/icon.png">
+    <link rel="icon" type="image/png" href="img/icon.png">
 </head>
 <body>
     <!-- Header -->
@@ -41,10 +41,13 @@
     <section class="files-container">
         <div class="container">
             <div class="files-header">
+                <a href="dashboard.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+                </a>
                 <h2 id="pageTitle">Todos os Arquivos</h2>
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Pesquisar arquivos...">
+                    <input type="text" id="searchInput" placeholder="Pesquisar arquivos..." onkeyup="filterFiles()">
                 </div>
             </div>
 
